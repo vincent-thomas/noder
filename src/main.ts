@@ -21,12 +21,14 @@ function run() {
     choices: ["none", "prettier", "eslint", "eslint-prettier"],
     default: "eslint"
   }), async (args) => {
+
     const packageJson = await generatePackageJson(args.name || "noder-project", "It's best practice to have a description", { usingTypes: true, wantsLinting: args.linting as "prettier" });
     const main = generateMain();
     mkdirSync(args.destination, {recursive: true});
     mkdirSync(`${args.destination}/src`, {recursive: true});
     writeFileSync(resolve(`${args.destination}/package.json`), packageJson);
     writeFileSync(resolve(`${args.destination}/src/main.ts`), main);
+
   }).command("build", "Build the project", (yarg) => yarg.option("type", {
     choices: ["lib", "app"],
     default: "lib"

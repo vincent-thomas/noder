@@ -1,10 +1,18 @@
 {
   "name": "@vincent-thomas/noder",
-  "version": "1.0.0",
+  "version": "0.0.1-development",
   "description": "",
   "type": "module",
   "bin": {
     "noder": "dist/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-thomas/noder"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "lint": "tsc --noEmit",
