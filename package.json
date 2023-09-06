@@ -1,0 +1,35 @@
+{
+  "name": "@vincent-thomas/noder",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "bin":  {
+    "noder": "dist/main.js"
+  },
+  "scripts": {
+    "build": "tsx ./src/main.ts build --type=app",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node --no-warnings --loader tsx ./src/main.ts"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@types/node": "^20.5.9",
+    "@types/yargs": "^17.0.24",
+    "semantic-release": "^21.1.1",
+    "tsx": "^3.12.8",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "latest-version": "^7.0.0",
+    "tsup": "^7.2.0",
+    "yargs": "^17.7.2"
+  }
+}
