@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read # for checkout
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm cache directory path
+        id: pnpm-cache-dir-path
+        shell: bash
+        run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Print node/npm versions
+        id: versions
+        shell: bash
+        run: |
+          node_ver=$( node --version )
+          pnpm_ver=$( pnpm --version || true )
+
+          echo "Node: ${node_ver:1}"
+          echo "NPM: $( npm --version )"
+          if [[ $pnpm_ver != '' ]]; then echo "PNPM: $pnpm_ver"; fi
+
+          echo "node_version=${node_ver:1}" >> $GITHUB_OUTPUT
+
+      - name: Use the node_modules cache if available [pnpm]
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          echo "Running pnpm install --frozen-lockfile"
+          pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm run lint
+      - run: pnpm run test
+
+
+  publish-npm:
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm cache directory path
+        id: pnpm-cache-dir-path
+        shell: bash
+        run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Print node/npm versions
+        id: versions
+        shell: bash
+        run: |
+          node_ver=$( node --version )
+          pnpm_ver=$( pnpm --version || true )
+
+          echo "Node: ${node_ver:1}"
+          echo "NPM: $( npm --version )"
+          if [[ $pnpm_ver != '' ]]; then echo "PNPM: $pnpm_ver"; fi
+
+          echo "node_version=${node_ver:1}" >> $GITHUB_OUTPUT
+
+      - name: Use the node_modules cache if available [pnpm]
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          echo "Running pnpm install --frozen-lockfile"
+          pnpm install --frozen-lockfile --ignore-scripts
+      - name: Verify the integrity of provenance attestations and registry signatures
+        run: npm audit signatures
+      - run: pnpm run lint
+      - run: pnpm run build
+      - run: pnpm run semantic-release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "bin":  {
+  "bin": {
     "noder": "dist/main.js"
   },
   "scripts": {
+    "lint": "tsc --noEmit",
     "build": "tsx ./src/main.ts build --type=app",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node --no-warnings --loader tsx ./src/main.ts"
+    "test": "echo \"Error: no test specified\"",
+    "run": "node --no-warnings --loader tsx ./src/main.ts",
+    "semantic-release": "semantic-release",
+    "prepare": "husky install"
   },
   "files": [
     "dist",
@@ -23,6 +26,7 @@
     "@commitlint/config-conventional": "^17.7.0",
     "@types/node": "^20.5.9",
     "@types/yargs": "^17.0.24",
+    "husky": "^8.0.3",
     "semantic-release": "^21.1.1",
     "tsx": "^3.12.8",
     "typescript": "^5.2.2"
