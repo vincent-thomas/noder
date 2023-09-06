@@ -7,6 +7,7 @@ import { join, resolve } from "node:path";
 import { build } from "tsup";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { generateMain } from "./generators/main.ts";
+import readline from "node:readline";
 
 function run() {
 
@@ -58,8 +59,8 @@ function run() {
       silent: !args.watch 
     })
     if (!args.watch) {
-      process.stdout.clearLine(0);
-      process.stdout.cursorTo(0);
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
       process.stdout.write("Building: Done\n");
       process.stdout.write(`Output at: ${resolve(outputDir)}\n\n`);
     }
